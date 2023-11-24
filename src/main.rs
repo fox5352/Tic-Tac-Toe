@@ -44,16 +44,12 @@ fn row_printer(row: &[&str; 3], curr_row: usize) {
 }
 
 // get user input
-fn get_player_move(player: &mut Player) {
-    println!("player place your x position:");
-    io::stdin()
-        .read_line(&mut player.x)
-        .expect("failed to read input");
-
-    println!("player place your y position:");
-    io::stdin()
-        .read_line(&mut player.y)
-        .expect("failed to read input");
+fn get_player_move(player: &mut String) {
+    let mut buffer = String::new();
+    
+    println!("place your x position:");
+    io::stdin().read_line(&mut buffer).expect("failed to read input");
+    *player = buffer.trim().to_string();
 }
 
 fn main() {
@@ -64,7 +60,7 @@ fn main() {
         [" ", " ", " "]
     ];
 
-    print!("press X to exit game or ctrl-c\n");
+    print!("press ctrl-c to exit game\n");
 
     'game_loop: loop {
         print_board(&board);
@@ -72,18 +68,38 @@ fn main() {
         let mut player1= Player{x: String::new(), y: String::new()};
         let mut player2 = Player{x: String::new(), y: String::new()};
 
-        // get players move
-        if game_moves % 2 != 0 {
-            get_player_move(&mut player1);
+        // get players moves in turns
+        if game_moves % 2 == 0 {
+            'player1_turn: {
+                println!("player 1");
+                get_player_move(&mut player1.x);
+                get_player_move(&mut player1.y);
+            }
         }else {
-            get_player_move(&mut player2);
+            'player2_turn: {
+                println!("player 2");
+                get_player_move(&mut player2.x);
+                get_player_move(&mut player2.y);
+            }
         }
         
-        if player1.x == "X" || player1.y == "X" || player2.x == "X" || player2.y == "X"{
-            break 'game_loop;
+        let player_list: [Player; 2] = [player1, player2];
+
+
+        // TODO: a move checker to see if move is valid if not jum back to input
+        // TODO: clear players moves then update board and the the loop cycle
+        
+        for player in player_list {
+            if player.x.len() > 0 {
+                println!("player x:{}", player.x);
+                println!("player y:{}", player.y);
+            }
         }
 
-
+        // max moves reached
+        if game_moves >= 9{
+            break 'game_loop;
+        }
         game_moves += 1;
     }
     println!("game ended");
