@@ -3,6 +3,7 @@ use std::io;
 struct Player {
     x: String,
     y: String,
+    symbol: String
 }
 
 // print game board
@@ -47,13 +48,13 @@ fn row_printer(row: &[&str; 3], curr_row: usize) {
 fn get_player_move(player: &mut String) {
     let mut buffer = String::new();
     
-    println!("place your x position:");
     io::stdin().read_line(&mut buffer).expect("failed to read input");
     *player = buffer.trim().to_string();
 }
 
 fn main() {
-    let mut game_moves = 0;
+    let mut game_moves: i32 = 0;
+    let mut move_stack: [(&str, &str, &str); 9];
     let board: [[&str; 3]; 3] = [
         [" ", " ", " "],
         [" ", " ", " "],
@@ -61,30 +62,32 @@ fn main() {
     ];
 
     print!("press ctrl-c to exit game\n");
-
     'game_loop: loop {
         print_board(&board);
         // TOD0: change player input to struct for x and y cords
-        let mut player1= Player{x: String::new(), y: String::new()};
-        let mut player2 = Player{x: String::new(), y: String::new()};
+        let mut player1= Player{x: String::new(), y: String::new(), symbol: String::from("X")};
+        let mut player2 = Player{x: String::new(), y: String::new(), symbol: String::from("O")};
 
         // get players moves in turns
         if game_moves % 2 == 0 {
-            'player1_turn: {
-                println!("player 1");
-                get_player_move(&mut player1.x);
-                get_player_move(&mut player1.y);
-            }
+            println!("player 1");
+            
+            println!("place your x position:");
+            get_player_move(&mut player1.x);
+
+            println!("place your y position:");
+            get_player_move(&mut player1.y);
         }else {
-            'player2_turn: {
-                println!("player 2");
-                get_player_move(&mut player2.x);
-                get_player_move(&mut player2.y);
-            }
+            println!("player 2");
+
+            println!("place your x position:");
+            get_player_move(&mut player2.x);
+            
+            println!("place your y position:");
+            get_player_move(&mut player2.y);
         }
         
         let player_list: [Player; 2] = [player1, player2];
-
 
         // TODO: a move checker to see if move is valid if not jum back to input
         // TODO: clear players moves then update board and the the loop cycle
