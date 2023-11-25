@@ -52,9 +52,19 @@ fn get_player_move(player: &mut String) {
     *player = buffer.trim().to_string();
 }
 
+fn validate_player_move(player_moves_stack: Vec<(String, String, String)>, x: String, y: String) -> bool {
+    for player_move in player_moves_stack {
+        let (pl_x, pl_y, _pl_sy) = player_move;
+        if pl_x == x || pl_y == y {
+            return false
+        }
+    }
+    return true;
+}
+
 fn main() {
     let mut game_moves: i32 = 0;
-    let mut move_stack: [(&str, &str, &str); 9];
+    let player_moves_stack: Vec<(String, String, String)> = vec![];
     let board: [[&str; 3]; 3] = [
         [" ", " ", " "],
         [" ", " ", " "],
@@ -68,28 +78,39 @@ fn main() {
         let mut player1= Player{x: String::new(), y: String::new(), symbol: String::from("X")};
         let mut player2 = Player{x: String::new(), y: String::new(), symbol: String::from("O")};
 
-        // get players moves in turns
+        // get players moves in turns and check to see if the move is valid
         if game_moves % 2 == 0 {
-            println!("player 1");
+            'player1_move: loop{
+                println!("player 1");
             
-            println!("place your x position:");
-            get_player_move(&mut player1.x);
+                println!("place your x position:");
+                get_player_move(&mut player1.x);
 
-            println!("place your y position:");
-            get_player_move(&mut player1.y);
+                println!("place your y position:");
+                get_player_move(&mut player1.y);
+
+                if validate_player_move(player_moves_stack.clone(), player1.x.clone(), player1.y.clone()) {
+                    break 'player1_move;   
+                }
+            }
         }else {
-            println!("player 2");
+            'player2_move: loop {
+                println!("player 2");
 
-            println!("place your x position:");
-            get_player_move(&mut player2.x);
-            
-            println!("place your y position:");
-            get_player_move(&mut player2.y);
+                println!("place your x position:");
+                get_player_move(&mut player2.x);
+                
+                println!("place your y position:");
+                get_player_move(&mut player2.y);
+                
+                if validate_player_move(player_moves_stack.clone(), player2.x.clone(), player2.y.clone()) {
+                    break 'player2_move;   
+                }
+            }
         }
         
         let player_list: [Player; 2] = [player1, player2];
 
-        // TODO: a move checker to see if move is valid if not jum back to input
         // TODO: clear players moves then update board and the the loop cycle
         
         for player in player_list {
