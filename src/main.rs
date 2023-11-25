@@ -1,9 +1,9 @@
 use std::io;
 
 struct Player {
-    x: String,
-    y: String,
-    symbol: String
+    x: i32,
+    y: i32,
+    symbol: char
 }
 
 // print game board
@@ -45,17 +45,26 @@ fn row_printer(row: &[&str; 3], curr_row: usize) {
 }
 
 // get user input
-fn get_player_move(player: &mut String) {
+fn get_player_move() -> i32{
     let mut buffer = String::new();
     
     io::stdin().read_line(&mut buffer).expect("failed to read input");
-    *player = buffer.trim().to_string();
+
+    let cord: i32 = buffer.trim().parse().expect("failed to get player input");
+
+    return cord;
 }
 
-fn validate_player_move(player_moves_stack: Vec<(String, String, String)>, x: String, y: String) -> bool {
+// check if x and y are in range then checks if the moves ah already been done
+fn validate_player_move(player_moves_stack: Vec<(i32, i32, String)>, x: i32, y: i32) -> bool {
+    if x > 2 || y > 2 {
+        return false;
+    }else if x < 0 || y < 0 {
+        return false;
+    }
     for player_move in player_moves_stack {
         let (pl_x, pl_y, _pl_sy) = player_move;
-        if pl_x == x || pl_y == y {
+        if pl_x == x && pl_y == y{
             return false
         }
     }
@@ -64,7 +73,7 @@ fn validate_player_move(player_moves_stack: Vec<(String, String, String)>, x: St
 
 fn main() {
     let mut game_moves: i32 = 0;
-    let player_moves_stack: Vec<(String, String, String)> = vec![];
+    let player_moves_stack: Vec<(i32, i32, String)> = vec![];
     let board: [[&str; 3]; 3] = [
         [" ", " ", " "],
         [" ", " ", " "],
@@ -75,8 +84,8 @@ fn main() {
     'game_loop: loop {
         print_board(&board);
         // TOD0: change player input to struct for x and y cords
-        let mut player1= Player{x: String::new(), y: String::new(), symbol: String::from("X")};
-        let mut player2 = Player{x: String::new(), y: String::new(), symbol: String::from("O")};
+        let mut player1: Player = Player{x: 0, y: 0, symbol: 'X'};
+        let mut player2: Player = Player{x: 0, y: 0, symbol: 'O'};
 
         // get players moves in turns and check to see if the move is valid
         if game_moves % 2 == 0 {
@@ -84,12 +93,14 @@ fn main() {
                 println!("player 1");
             
                 println!("place your x position:");
-                get_player_move(&mut player1.x);
+                player1.x = get_player_move();
 
                 println!("place your y position:");
-                get_player_move(&mut player1.y);
+                player1.y = get_player_move();
 
-                if validate_player_move(player_moves_stack.clone(), player1.x.clone(), player1.y.clone()) {
+                let valid_input: bool = validate_player_move(player_moves_stack.clone(), player1.x, player1.y);
+
+                if valid_input {
                     break 'player1_move;   
                 }
             }
@@ -98,12 +109,14 @@ fn main() {
                 println!("player 2");
 
                 println!("place your x position:");
-                get_player_move(&mut player2.x);
+                player2.x = get_player_move();
                 
                 println!("place your y position:");
-                get_player_move(&mut player2.y);
+                player2.y = get_player_move();
                 
-                if validate_player_move(player_moves_stack.clone(), player2.x.clone(), player2.y.clone()) {
+                let valid_input: bool = validate_player_move(player_moves_stack.clone(), player2.x, player2.y);
+
+                if valid_input {
                     break 'player2_move;   
                 }
             }
@@ -112,13 +125,6 @@ fn main() {
         let player_list: [Player; 2] = [player1, player2];
 
         // TODO: clear players moves then update board and the the loop cycle
-        
-        for player in player_list {
-            if player.x.len() > 0 {
-                println!("player x:{}", player.x);
-                println!("player y:{}", player.y);
-            }
-        }
 
         // max moves reached
         if game_moves >= 9{
