@@ -56,7 +56,7 @@ fn get_player_move() -> i32{
 }
 
 // check if x and y are in range then checks if the moves ah already been done
-fn validate_player_move(player_moves_stack: Vec<(i32, i32, String)>, x: i32, y: i32) -> bool {
+fn validate_player_move(player_moves_stack: Vec<(i32, i32, char)>, x: i32, y: i32) -> bool {
     if x > 2 || y > 2 {
         return false;
     }else if x < 0 || y < 0 {
@@ -73,7 +73,7 @@ fn validate_player_move(player_moves_stack: Vec<(i32, i32, String)>, x: i32, y: 
 
 fn main() {
     let mut game_moves: i32 = 0;
-    let player_moves_stack: Vec<(i32, i32, String)> = vec![];
+    let mut player_moves_stack: Vec<(i32, i32, char)> = vec![];
     let board: [[&str; 3]; 3] = [
         [" ", " ", " "],
         [" ", " ", " "],
@@ -101,6 +101,7 @@ fn main() {
                 let valid_input: bool = validate_player_move(player_moves_stack.clone(), player1.x, player1.y);
 
                 if valid_input {
+                    player_moves_stack.push((player1.x, player1.y, player1.symbol));
                     break 'player1_move;   
                 }
             }
@@ -117,12 +118,14 @@ fn main() {
                 let valid_input: bool = validate_player_move(player_moves_stack.clone(), player2.x, player2.y);
 
                 if valid_input {
+                    player_moves_stack.push((player2.x, player2.y, player2.symbol));
                     break 'player2_move;   
                 }
             }
         }
         
-        let player_list: [Player; 2] = [player1, player2];
+        let _player_list: [Player; 2] = [player1, player2];
+
 
         // TODO: clear players moves then update board and the the loop cycle
 
