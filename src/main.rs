@@ -1,7 +1,6 @@
 use std::char;
 use std::io;
 
-
 struct Player {
     x: i32,
     y: i32,
