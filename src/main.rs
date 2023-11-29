@@ -1,9 +1,17 @@
+use std::char;
 use std::io;
+
 
 struct Player {
     x: i32,
     y: i32,
     symbol: char
+}
+
+struct PathPos {
+    x: usize,
+    y: usize,
+    char: String
 }
 
 // print game board
@@ -90,6 +98,128 @@ fn update_board(player_moves_stack: Vec<(i32, i32, char)>, board: &mut [[String;
     }
 }
 
+fn pattern_finder(board: &[[String; 3]; 3]) ->bool {
+    // list of tuples that the path taken
+    let mut path: Vec<PathPos> = Vec::new();
+
+    // loop board y axis
+    for index_y in 0..board.len() {
+        // get length of row
+        let _size: u32 = board[index_y].len() as u32;
+
+        // loop board X axis
+        for index_x in 0..board[index_y].len(){
+
+            // the character to match with
+            let match_char: String = board[index_y][index_x].clone();
+
+            // loops all 8 directions
+            for pattern_type in 0..7 {
+                // 
+                path_finder(pattern_type, &board, &mut path, &match_char, index_x, index_y, 2, 2);
+
+                if path.len() == 3 {
+                    return true;
+                }else {
+                    // clean path list
+                    for item in 0..path.len() {
+                        path.pop();
+                    };
+                }
+            }
+        }
+    }
+    return false;
+}
+
+fn path_finder(direction: i32, board: &[[String; 3]; 3], path: &mut Vec<PathPos>, prev_char: &String, curr_x: usize, curr_y: usize, x_limit: usize, y_limit: usize) {
+    const EMPTY_STR: &str = "";
+
+    if prev_char[..] != *EMPTY_STR {
+        if path.len() == 3 {
+            return;
+        }
+        // move up
+        else if direction == 0 {
+            // if next == current && top wall reached
+            if board[curr_y][curr_x] == *prev_char && curr_y == 0 {
+                path.push(PathPos { x: curr_x, y: curr_y, char: prev_char.clone() });
+
+                return;
+            }
+            // if next == current && > top wall
+            else if board[curr_y][curr_x] == *prev_char && curr_y > 0{
+                path.push(PathPos { x: curr_x, y: curr_y, char: prev_char.clone() });
+                
+                path_finder(direction, &board, path, prev_char, curr_x, curr_y - 1, x_limit, y_limit);
+            }
+            // if next != current
+            else if board[curr_y][curr_x] != *prev_char {
+                return;
+            }
+        }
+        // move up-right
+        else if direction == 1 {
+            // if next == current && top right corner
+            if board[curr_y][curr_x] == *prev_char && curr_y == 0 && curr_x == x_limit {
+                path.push(PathPos { x: curr_x, y: curr_y, char: prev_char.clone() });
+
+                return;
+            }
+            // if next == current && < top right corner
+            else if board[curr_y][curr_x] == *prev_char && curr_y > 0 && curr_x < x_limit{
+                path.push(PathPos { x: curr_x, y: curr_y, char: prev_char.clone() });
+                
+                path_finder(direction, &board, path, prev_char, curr_x + 1, curr_y - 1, x_limit, y_limit);
+            }
+            // if next != current
+            else if board[curr_y][curr_x] != *prev_char {
+                return;
+            }
+        }
+        // move right
+        else if direction == 2{
+            // if next == current && wall reached
+            if board[curr_y][curr_x] == *prev_char && curr_x == x_limit {
+                
+                path.push(PathPos { x: curr_x, y: curr_y, char: prev_char.clone() });
+
+                return;
+            }
+            // if next == current && < wall
+            else if board[curr_y][curr_x] == *prev_char && curr_x < x_limit{
+                path.push(PathPos { x: curr_x, y: curr_y, char: prev_char.clone() });
+                
+                path_finder(direction, &board, path, prev_char, curr_x + 1, curr_y, x_limit, y_limit);
+            }
+            // if next != current
+            else if board[curr_y][curr_x] != *prev_char {
+                return;
+            }
+        }
+        // move down-right
+        else if direction == 3 {
+            // if next == current && bottom right corner
+            if board[curr_y][curr_x] == *prev_char && curr_y == y_limit && curr_x == x_limit {
+                path.push(PathPos { x: curr_x, y: curr_y, char: prev_char.clone() });
+
+                return;
+            }
+            // if next == current && < bottom right corner
+            else if board[curr_y][curr_x] == *prev_char && curr_y < y_limit && curr_x < x_limit{
+                path.push(PathPos { x: curr_x, y: curr_y, char: prev_char.clone() });
+                
+                path_finder(direction, &board, path, prev_char, curr_x + 1, curr_y + 1, x_limit, y_limit);
+            }
+            // if next != current
+            else if board[curr_y][curr_x] != *prev_char {
+                return;
+            }
+        }
+        
+    }
+}
+
 fn main() {
     let mut game_moves: i32 = 0;
     let mut player_moves_stack: Vec<(i32, i32, char)> = vec![];
@@ -101,7 +231,16 @@ fn main() {
 
     print!("press ctrl-c to exit game\n");
     'game_loop: loop {
+        // reprints board
         print_board(&board);
+
+        // wind checker
+        let player_win = pattern_finder(&board);
+
+        if player_win {
+            break 'game_loop;
+        }
+
         // TOD0: change player input to struct for x and y cords
         let mut player1: Player = Player{x: 0, y: 0, symbol: 'X'};
         let mut player2: Player = Player{x: 0, y: 0, symbol: 'O'};
